@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: compute-resources-area-calidad-dev
 spec:
   replicas: 1
   selector:
@@ -28,7 +27,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: influxdb
-  namespace: compute-resources-area-calidad-dev
 spec:
   replicas: 1
   selector:
@@ -75,7 +73,6 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: influxdb-admin-token
-  namespace: compute-resources-area-calidad-dev
 type: Opaque
 stringData:
   token: apiv3_z6XfweFMd3rNML1ixCdvaEkfnQAO-tzC
@@ -90,7 +87,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: influxdb-init-k6
-  namespace: compute-resources-area-calidad-dev
 spec:
   backoffLimit: 6
   ttlSecondsAfterFinished: 300
