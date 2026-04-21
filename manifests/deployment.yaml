@@ -51,6 +51,8 @@ spec:
             - file
             - --data-dir
             - /var/lib/influxdb3/data
+            - --admin-token-file
+            - /etc/influxdb3/admin-token/admin-token.json
           ports:
             - containerPort: 8181
           env:
@@ -59,19 +61,41 @@ spec:
           volumeMounts:
             - name: influxdb-data
               mountPath: /var/lib/influxdb3/data
+            - name: influxdb-admin-token
+              mountPath: /etc/influxdb3/admin-token
+              readOnly: true
       volumes:
         - name: influxdb-data
           emptyDir: {}
+        - name: influxdb-admin-token
+          secret:
+            secretName: influxdb-admin-token
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
+metadata:
+  name: influxdb-admin-token
+  namespace: compute-resources-area-calidad-dev
+type: Opaque
+stringData:
+  admin-token.json: |
+    {
+      "token": "apiv3_change_this_token_before_prod",
+      "name": "_admin",
+      "description": "Admin token for InfluxDB 3 Core on Kubernetes"
+    }
+---
+apiVersion: v1
+kind: Secret
 metadata:
   name: influxdb-explorer-config
   namespace: compute-resources-area-calidad-dev
-data:
+type: Opaque
+stringData:
   config.json: |
     {
       "DEFAULT_INFLUX_SERVER": "http://influxdb:8181",
+      "DEFAULT_API_TOKEN": "7fA9xQ2LmZ8pK4wR1dV6Hj3YcN5uT0Bq",
       "DEFAULT_SERVER_NAME": "InfluxDB Core 3.9"
     }
 ---
@@ -103,5 +127,5 @@ spec:
               readOnly: true
       volumes:
         - name: influxdb-explorer-config
-          configMap:
+          secret:
             name: influxdb-explorer-config
