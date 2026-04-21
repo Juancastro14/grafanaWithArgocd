@@ -95,7 +95,7 @@ stringData:
   config.json: |
     {
       "DEFAULT_INFLUX_SERVER": "http://influxdb:8181",
-      "DEFAULT_API_TOKEN": "7fA9xQ2LmZ8pK4wR1dV6Hj3YcN5uT0Bq",
+      "DEFAULT_API_TOKEN": "apiv3_change_this_token_before_prod",
       "DEFAULT_SERVER_NAME": "InfluxDB Core 3.9"
     }
 ---
