@@ -41,6 +41,67 @@ spec:
     spec:
       containers:
         - name: influxdb
-          image: influxdb:2.7
+          image: influxdb:3.9.0-core
+          args:
+            - influxdb3
+            - serve
+            - --node-id
+            - influxdb
+            - --object-store
+            - file
+            - --data-dir
+            - /var/lib/influxdb3/data
           ports:
-            - containerPort: 8086
+            - containerPort: 8181
+          env:
+            - name: INFLUXDB3_LOG_FILTER
+              value: info
+          volumeMounts:
+            - name: influxdb-data
+              mountPath: /var/lib/influxdb3/data
+      volumes:
+        - name: influxdb-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: influxdb-explorer-config
+  namespace: compute-resources-area-calidad-dev
+data:
+  config.json: |
+    {
+      "DEFAULT_INFLUX_SERVER": "http://influxdb:8181",
+      "DEFAULT_SERVER_NAME": "InfluxDB Core 3.9"
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb-explorer
+  namespace: compute-resources-area-calidad-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb-explorer
+  template:
+    metadata:
+      labels:
+        app: influxdb-explorer
+    spec:
+      containers:
+        - name: influxdb-explorer
+          image: influxdata/influxdb3-ui:1.6.2
+          args:
+            - --mode=admin
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: influxdb-explorer-config
+              mountPath: /app-root/config
+              readOnly: true
+      volumes:
+        - name: influxdb-explorer-config
+          configMap:
+            name: influxdb-explorer-config

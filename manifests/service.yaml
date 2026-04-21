@@ -22,6 +22,20 @@ spec:
     app: influxdb
   ports:
     - name: http
-      port: 8086
-      targetPort: 8086
+      port: 8181
+      targetPort: 8181
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influxdb-explorer
+  namespace: compute-resources-area-calidad-dev
+spec:
+  selector:
+    app: influxdb-explorer
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
   type: ClusterIP
