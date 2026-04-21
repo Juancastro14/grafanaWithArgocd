@@ -128,4 +128,4 @@ spec:
       volumes:
         - name: influxdb-explorer-config
           secret:
-            name: influxdb-explorer-config
+            secretName: influxdb-explorer-config
