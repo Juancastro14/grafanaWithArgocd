@@ -1,32 +1,6 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grafana
-  namespace: compute-resources-area-calidad-dev
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: grafana
-  template:
-    metadata:
-      labels:
-        app: grafana
-    spec:
-      containers:
-        - name: grafana
-          image: grafana/grafana:10.4.3
-          ports:
-            - containerPort: 3000
-          env:
-            - name: GF_SECURITY_ADMIN_USER
-              value: admin
-            - name: GF_SECURITY_ADMIN_PASSWORD
-              value: admin123
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
   name: influxdb
   namespace: compute-resources-area-calidad-dev
 spec:
@@ -78,54 +52,38 @@ metadata:
   namespace: compute-resources-area-calidad-dev
 type: Opaque
 stringData:
+  token: apiv3_z6XfweFMd3rNML1ixCdvaEkfnQAO-tzC
   admin-token.json: |
     {
-      "token": "apiv3_change_this_token_before_prod",
-      "name": "_admin",
+      "token": "apiv3_z6XfweFMd3rNML1ixCdvaEkfnQAO-tzC",
+      "name": "k6_admin",
       "description": "Admin token for InfluxDB 3 Core on Kubernetes"
     }
 ---
-apiVersion: v1
-kind: Secret
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: influxdb-explorer-config
-  namespace: compute-resources-area-calidad-dev
-type: Opaque
-stringData:
-  config.json: |
-    {
-      "DEFAULT_INFLUX_SERVER": "http://influxdb:8181",
-      "DEFAULT_API_TOKEN": "apiv3_change_this_token_before_prod",
-      "DEFAULT_SERVER_NAME": "InfluxDB Core 3.9"
-    }
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: influxdb-explorer
+  name: influxdb-init-k6
   namespace: compute-resources-area-calidad-dev
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: influxdb-explorer
+  backoffLimit: 6
+  ttlSecondsAfterFinished: 300
   template:
-    metadata:
-      labels:
-        app: influxdb-explorer
     spec:
+      restartPolicy: OnFailure
       containers:
-        - name: influxdb-explorer
-          image: influxdata/influxdb3-ui:1.6.2
-          args:
-            - --mode=admin
-          ports:
-            - containerPort: 80
-          volumeMounts:
-            - name: influxdb-explorer-config
-              mountPath: /app-root/config
-              readOnly: true
-      volumes:
-        - name: influxdb-explorer-config
-          secret:
-            secretName: influxdb-explorer-config
+        - name: create-k6-database
+          image: influxdb:3.9.0-core
+          command:
+            - influxdb3
+            - create
+            - database
+            - k6
+          env:
+            - name: INFLUXDB3_HOST_URL
+              value: http://influxdb:8181
+            - name: INFLUXDB3_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-admin-token
+                  key: token
