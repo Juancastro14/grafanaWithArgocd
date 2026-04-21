@@ -50,7 +50,7 @@ spec:
             - --data-dir
             - /var/lib/influxdb3/data
             - --admin-token-file
-            - /etc/influxdb3/admin-token/admin-token.json
+            - /etc/influxdb3/admin-token/token
           ports:
             - containerPort: 8181
           env:
@@ -76,12 +76,6 @@ metadata:
 type: Opaque
 stringData:
   token: apiv3_z6XfweFMd3rNML1ixCdvaEkfnQAO-tzC
-  admin-token.json: |
-    {
-      "token": "apiv3_z6XfweFMd3rNML1ixCdvaEkfnQAO-tzC",
-      "name": "k6_admin",
-      "description": "Admin token for InfluxDB 3 Core on Kubernetes"
-    }
 ---
 apiVersion: batch/v1
 kind: Job
